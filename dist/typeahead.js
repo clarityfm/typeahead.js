@@ -309,6 +309,7 @@
                 var that = this, encodedQuery = encodeURIComponent(query || ""), url, resp;
                 url = this.replace ? this.replace(this.url, encodedQuery) : this.url.replace(this.wildcard, encodedQuery);
                 if (resp = requestCache.get(url)) {
+                    resp = that.filter ? that.filter(resp) : resp;
                     cb && cb(resp);
                 } else if (belowPendingRequestsThreshold()) {
                     incrementPendingRequests();
@@ -317,9 +318,9 @@
                     this.onDeckRequestArgs = [].slice.call(arguments, 0);
                 }
                 function done(resp) {
+                    requestCache.set(url, resp);
                     resp = that.filter ? that.filter(resp) : resp;
                     cb && cb(resp);
-                    requestCache.set(url, resp);
                 }
                 function always() {
                     decrementPendingRequests();
@@ -348,7 +349,7 @@
                 $.error("no template engine specified");
             }
             if (!o.local && !o.prefetch && !o.remote) {
-                $.error("one of local, prefetch, or remote is requried");
+                $.error("one of local, prefetch, or remote is required");
             }
             this.name = o.name || utils.getUniqueId();
             this.limit = o.limit || 5;
@@ -968,6 +969,7 @@
                 if (hint !== "" && query !== hint) {
                     suggestion = this.dropdownView.getFirstSuggestion();
                     this.inputView.setInputValue(suggestion.value);
+                    this.eventBus.trigger("autocompleted", suggestion.datum);
                 }
             },
             _propagateEvent: function(e) {
@@ -1025,9 +1027,6 @@
             initialize: function(datasetDefs) {
                 var datasets;
                 datasetDefs = utils.isArray(datasetDefs) ? datasetDefs : [ datasetDefs ];
-                if (this.length === 0) {
-                    $.error("typeahead initialized without DOM element");
-                }
                 if (datasetDefs.length === 0) {
                     $.error("no datasets provided");
                 }
