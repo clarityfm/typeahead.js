@@ -51,6 +51,7 @@ var Transport = (function() {
         this.url.replace(this.wildcard, encodedQuery);
 
       if (resp = requestCache.get(url)) {
+        resp = that.filter ? that.filter(resp) : resp;
         cb && cb(resp);
       }
 
@@ -65,10 +66,9 @@ var Transport = (function() {
 
       // success callback
       function done(resp) {
-        resp = that.filter ? that.filter(resp) : resp;
-
-        cb && cb(resp);
         requestCache.set(url, resp);
+        resp = that.filter ? that.filter(resp) : resp;
+        cb && cb(resp);
       }
 
       // comlete callback
