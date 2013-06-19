@@ -24,6 +24,8 @@ var DropdownView = (function() {
     this.isEmpty = true;
     this.isMouseOverDropdown = false;
 
+    this.o = o.opts[0];
+
     this.$menu = $(o.menu)
     .on('mouseenter.tt', this._handleMouseenter)
     .on('mouseleave.tt', this._handleMouseleave)
@@ -125,7 +127,7 @@ var DropdownView = (function() {
     },
 
     close: function() {
-      if (this.isOpen) {
+      if (this.isOpen && this.o.closeOnBlur) {
         this.isOpen = false;
         this._hide();
 

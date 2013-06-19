@@ -386,6 +386,7 @@
             this.footer = o.footer;
             this.valueKey = o.valueKey || "value";
             this.template = compileTemplate(o.template, o.engine, this.valueKey);
+            this.closeOnBlur = typeof o.closeOnBlur !== "undefined" ? o.closeOnBlur : true;
             this.local = o.local;
             this.prefetch = o.prefetch;
             this.remote = o.remote;
@@ -703,6 +704,7 @@
             this.isOpen = false;
             this.isEmpty = true;
             this.isMouseOverDropdown = false;
+            this.o = o.opts[0];
             this.$menu = $(o.menu).on("mouseenter.tt", this._handleMouseenter).on("mouseleave.tt", this._handleMouseleave).on("click.tt", ".tt-suggestion", this._handleSelection).on("mouseover.tt", ".tt-suggestion", this._handleMouseover);
         }
         utils.mixin(DropdownView.prototype, EventTarget, {
@@ -762,7 +764,7 @@
                 }
             },
             close: function() {
-                if (this.isOpen) {
+                if (this.isOpen && this.o.closeOnBlur) {
                     this.isOpen = false;
                     this._hide();
                     this.$menu.find(".tt-suggestions > .tt-suggestion").removeClass("tt-is-under-cursor");
@@ -896,7 +898,8 @@
             $input = this.$node.find(".tt-query");
             $hint = this.$node.find(".tt-hint");
             this.dropdownView = new DropdownView({
-                menu: $menu
+                menu: $menu,
+                opts: o.datasets
             }).on("suggestionSelected", this._handleSelection).on("cursorMoved", this._clearHint).on("cursorMoved", this._setInputValueToSuggestionUnderCursor).on("cursorRemoved", this._setInputValueToQuery).on("cursorRemoved", this._updateHint).on("suggestionsRendered", this._updateHint).on("opened", this._updateHint).on("closed", this._clearHint).on("opened closed", this._propagateEvent);
             this.inputView = new InputView({
                 input: $input,

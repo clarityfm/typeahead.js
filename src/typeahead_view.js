@@ -72,7 +72,7 @@ var TypeaheadView = (function() {
     $input = this.$node.find('.tt-query');
     $hint = this.$node.find('.tt-hint');
 
-    this.dropdownView = new DropdownView({ menu: $menu })
+    this.dropdownView = new DropdownView({ menu: $menu, opts: o.datasets })
     .on('suggestionSelected', this._handleSelection)
     .on('cursorMoved', this._clearHint)
     .on('cursorMoved', this._setInputValueToSuggestionUnderCursor)
