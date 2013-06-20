@@ -188,6 +188,8 @@ var TypeaheadView = (function() {
     _closeDropdown: function(e) {
       this.dropdownView[e.type === 'blured' ?
         'closeUnlessMouseIsOverDropdown' : 'close']();
+
+      this.eventBus.trigger("loaded")
     },
 
     _moveDropdownCursor: function(e) {
@@ -224,13 +226,22 @@ var TypeaheadView = (function() {
     _getSuggestions: function() {
       var that = this, query = this.inputView.getQuery();
 
-      if (utils.isBlankString(query)) { return; }
+      if (utils.isBlankString(query)) {
+          this.eventBus.trigger('loaded');
+        return;
+      }
+
+      this.eventBus.trigger('loading');
 
       utils.each(this.datasets, function(i, dataset) {
-        dataset.getSuggestions(query, function(suggestions) {
+        dataset.getSuggestions(query, function(suggestions, forced) {
           // only render the suggestions if the query hasn't changed
           if (query === that.inputView.getQuery()) {
             that.dropdownView.renderSuggestions(dataset, suggestions);
+
+            if ((suggestions.length > 0 || dataset.transport.noPendingRequests()) && !forced) {
+              that.eventBus.trigger('loaded');
+            }
           }
         });
       });

@@ -119,13 +119,22 @@ var Transport = (function() {
 
       // return bool indicating whether or not a cache hit occurred
       return !!resp;
-    }
+    },
+
+    noPendingRequests: function() {
+      return noPendingRequests();
+    },
+
   });
 
   return Transport;
 
   // static methods
   // --------------
+
+  function noPendingRequests() {
+    return pendingRequestsCount <= 0;
+  }
 
   function incrementPendingRequests() {
     pendingRequestsCount++;

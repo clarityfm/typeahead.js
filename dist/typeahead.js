@@ -351,9 +351,15 @@
                     this._get(url, cb);
                 }
                 return !!resp;
+            },
+            noPendingRequests: function() {
+                return noPendingRequests();
             }
         });
         return Transport;
+        function noPendingRequests() {
+            return pendingRequestsCount <= 0;
+        }
         function incrementPendingRequests() {
             pendingRequestsCount++;
         }
@@ -528,7 +534,7 @@
                 if (suggestions.length < this.limit && this.transport) {
                     cacheHit = this.transport.get(query, processRemoteData);
                 }
-                !cacheHit && cb && cb(suggestions);
+                !cacheHit && cb && cb(suggestions, true);
                 function processRemoteData(data) {
                     suggestions = suggestions.slice(0);
                     utils.each(data, function(i, datum) {
@@ -960,6 +966,7 @@
             },
             _closeDropdown: function(e) {
                 this.dropdownView[e.type === "blured" ? "closeUnlessMouseIsOverDropdown" : "close"]();
+                this.eventBus.trigger("loaded");
             },
             _moveDropdownCursor: function(e) {
                 var $e = e.data;
@@ -979,12 +986,17 @@
             _getSuggestions: function() {
                 var that = this, query = this.inputView.getQuery();
                 if (utils.isBlankString(query)) {
+                    this.eventBus.trigger("loaded");
                     return;
                 }
+                this.eventBus.trigger("loading");
                 utils.each(this.datasets, function(i, dataset) {
-                    dataset.getSuggestions(query, function(suggestions) {
+                    dataset.getSuggestions(query, function(suggestions, forced) {
                         if (query === that.inputView.getQuery()) {
                             that.dropdownView.renderSuggestions(dataset, suggestions);
+                            if ((suggestions.length > 0 || dataset.transport.noPendingRequests()) && !forced) {
+                                that.eventBus.trigger("loaded");
+                            }
                         }
                     });
                 });

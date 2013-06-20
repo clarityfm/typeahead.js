@@ -267,7 +267,7 @@ var Dataset = (function() {
       // if a cache hit occurred, skip rendering local suggestions
       // because the rendering of local/remote suggestions is already
       // in the event loop
-      !cacheHit && cb && cb(suggestions);
+      !cacheHit && cb && cb(suggestions, true);
 
       // callback for transport.get
       function processRemoteData(data) {
