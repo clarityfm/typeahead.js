@@ -963,7 +963,9 @@
             },
             _clearSuggestions: function() {
                 this.dropdownView.clearSuggestions();
-                this.eventBus.trigger("loaded");
+                if (this.inputView.getQuery() == "") {
+                    this.eventBus.trigger("loaded");
+                }
             },
             _setInputValueToQuery: function() {
                 this.inputView.setInputValue(this.inputView.getQuery());
@@ -977,9 +979,6 @@
             },
             _closeDropdown: function(e) {
                 this.dropdownView[e.type === "blured" ? "closeUnlessMouseIsOverDropdown" : "close"]();
-                if (this.inputView.getQuery() == "") {
-                    this.eventBus.trigger("loaded");
-                }
             },
             _moveDropdownCursor: function(e) {
                 var $e = e.data;
