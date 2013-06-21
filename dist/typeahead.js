@@ -394,6 +394,7 @@
             this.template = compileTemplate(o.template, o.engine, this.valueKey);
             this.closeOnBlur = typeof o.closeOnBlur !== "undefined" ? o.closeOnBlur : true;
             this.local = o.local;
+            this.custom = o.custom;
             this.prefetch = o.prefetch;
             this.remote = o.remote;
             this.itemHash = {};
@@ -526,8 +527,17 @@
             },
             getSuggestions: function(query, cb) {
                 var that = this, terms, suggestions, cacheHit = false;
+                if (cb && this.custom) {
+                    var customResults = utils.map(this._processData(this.custom(query) || []).itemHash, function(v, k) {
+                        return v;
+                    });
+                    if (customResults.length) {
+                        cb(customResults);
+                        return true;
+                    }
+                }
                 if (query.length < this.minLength) {
-                    return;
+                    return true;
                 }
                 terms = utils.tokenizeQuery(query);
                 suggestions = this._getLocalSuggestions(terms).slice(0, this.limit);
@@ -906,7 +916,7 @@
             this.dropdownView = new DropdownView({
                 menu: $menu,
                 opts: o.datasets
-            }).on("suggestionSelected", this._handleSelection).on("cursorMoved", this._clearHint).on("cursorMoved", this._setInputValueToSuggestionUnderCursor).on("cursorRemoved", this._setInputValueToQuery).on("cursorRemoved", this._updateHint).on("suggestionsRendered", this._updateHint).on("opened", this._updateHint).on("closed", this._clearHint).on("opened closed", this._propagateEvent);
+            }).on("suggestionSelected", this._handleSelection).on("cursorMoved", this._clearHint).on("cursorMoved", this._setInputValueToSuggestionUnderCursor).on("cursorRemoved", this._setInputValueToQuery).on("cursorRemoved", this._updateHint).on("suggestionsRendered", this._updateHint).on("opened", this._updateHint).on("closed", this._clearHint).on("opened closed suggestionsRendered", this._propagateEvent);
             this.inputView = new InputView({
                 input: $input,
                 hint: $hint
@@ -985,13 +995,8 @@
             },
             _getSuggestions: function() {
                 var that = this, query = this.inputView.getQuery();
-                if (utils.isBlankString(query)) {
-                    this.eventBus.trigger("loaded");
-                    return;
-                }
-                this.eventBus.trigger("loading");
                 utils.each(this.datasets, function(i, dataset) {
-                    dataset.getSuggestions(query, function(suggestions, forced) {
+                    var done = dataset.getSuggestions(query, function(suggestions, forced) {
                         if (query === that.inputView.getQuery()) {
                             that.dropdownView.renderSuggestions(dataset, suggestions);
                             if ((suggestions.length > 0 || dataset.transport.noPendingRequests()) && !forced) {
@@ -999,6 +1004,9 @@
                             }
                         }
                     });
+                    if (!done) {
+                        that.eventBus.trigger("loading");
+                    }
                 });
             },
             _autocomplete: function(e) {

@@ -34,6 +34,7 @@ var Dataset = (function() {
 
     // used then deleted in #initialize
     this.local = o.local;
+    this.custom = o.custom;
     this.prefetch = o.prefetch;
     this.remote = o.remote;
 
@@ -207,7 +208,6 @@ var Dataset = (function() {
       if (lists.length < firstChars.length) {
         return [];
       }
-
       // populate suggestions
       utils.each(shortestList, function(i, id) {
         var item = that.itemHash[id], isCandidate, isMatch;
@@ -253,8 +253,17 @@ var Dataset = (function() {
       var that = this, terms, suggestions, cacheHit = false;
 
       // don't do anything until the minLength constraint is met
+
+      if (cb && this.custom) {
+        var customResults = utils.map(this._processData(this.custom(query) || []).itemHash, function(v, k) {return v});
+        if (customResults.length) {
+          cb(customResults);
+          return true;
+        }
+      }
+
       if (query.length < this.minLength) {
-        return;
+        return true;
       }
 
       terms = utils.tokenizeQuery(query);
@@ -288,7 +297,6 @@ var Dataset = (function() {
           // the remote results and can break out of the each loop
           return suggestions.length < that.limit;
         });
-
         cb && cb(suggestions);
       }
     }

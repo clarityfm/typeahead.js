@@ -81,7 +81,7 @@ var TypeaheadView = (function() {
     .on('suggestionsRendered', this._updateHint)
     .on('opened', this._updateHint)
     .on('closed', this._clearHint)
-    .on('opened closed', this._propagateEvent);
+    .on('opened closed suggestionsRendered', this._propagateEvent);
 
     this.inputView = new InputView({ input: $input, hint: $hint })
     .on('focused', this._openDropdown)
@@ -226,15 +226,8 @@ var TypeaheadView = (function() {
     _getSuggestions: function() {
       var that = this, query = this.inputView.getQuery();
 
-      if (utils.isBlankString(query)) {
-          this.eventBus.trigger('loaded');
-        return;
-      }
-
-      this.eventBus.trigger('loading');
-
       utils.each(this.datasets, function(i, dataset) {
-        dataset.getSuggestions(query, function(suggestions, forced) {
+        var done = dataset.getSuggestions(query, function(suggestions, forced) {
           // only render the suggestions if the query hasn't changed
           if (query === that.inputView.getQuery()) {
             that.dropdownView.renderSuggestions(dataset, suggestions);
@@ -244,6 +237,9 @@ var TypeaheadView = (function() {
             }
           }
         });
+        if (!done) {
+          that.eventBus.trigger('loading');
+        }
       });
     },
 
