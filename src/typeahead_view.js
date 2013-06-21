@@ -191,6 +191,8 @@ var TypeaheadView = (function() {
     _closeDropdown: function(e) {
       this.dropdownView[e.type === 'blured' ?
         'closeUnlessMouseIsOverDropdown' : 'close']();
+
+      this.eventBus.trigger("loaded");
     },
 
     _moveDropdownCursor: function(e) {

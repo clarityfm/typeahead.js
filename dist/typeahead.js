@@ -979,6 +979,7 @@
             },
             _closeDropdown: function(e) {
                 this.dropdownView[e.type === "blured" ? "closeUnlessMouseIsOverDropdown" : "close"]();
+                this.eventBus.trigger("loaded");
             },
             _moveDropdownCursor: function(e) {
                 var $e = e.data;
