@@ -169,6 +169,7 @@ var TypeaheadView = (function() {
 
     _clearSuggestions: function() {
       this.dropdownView.clearSuggestions();
+      this.eventBus.trigger("loaded");
     },
 
     _setInputValueToQuery: function() {
@@ -189,7 +190,10 @@ var TypeaheadView = (function() {
       this.dropdownView[e.type === 'blured' ?
         'closeUnlessMouseIsOverDropdown' : 'close']();
 
-      this.eventBus.trigger("loaded")
+      if (this.inputView.getQuery() == '') {
+        pcol( "loaded: query is empty (%o)", this.inputView.getQuery() )
+        this.eventBus.trigger("loaded");
+      }
     },
 
     _moveDropdownCursor: function(e) {
