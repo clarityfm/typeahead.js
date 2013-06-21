@@ -191,7 +191,6 @@ var TypeaheadView = (function() {
         'closeUnlessMouseIsOverDropdown' : 'close']();
 
       if (this.inputView.getQuery() == '') {
-        pcol( "loaded: query is empty (%o)", this.inputView.getQuery() )
         this.eventBus.trigger("loaded");
       }
     },

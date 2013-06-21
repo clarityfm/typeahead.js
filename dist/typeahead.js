@@ -978,7 +978,6 @@
             _closeDropdown: function(e) {
                 this.dropdownView[e.type === "blured" ? "closeUnlessMouseIsOverDropdown" : "close"]();
                 if (this.inputView.getQuery() == "") {
-                    pcol("loaded: query is empty (%o)", this.inputView.getQuery());
                     this.eventBus.trigger("loaded");
                 }
             },
